@@ -114,6 +114,15 @@ const MODEL_FACTORIES: Record<string, ModelFactory> = {
         baseURL: 'https://api.deepseek.com',
       },
     }),
+  minimax: (name, opts) =>
+    new ChatOpenAI({
+      model: name,
+      ...opts,
+      apiKey: getApiKey('MINIMAX_API_KEY'),
+      configuration: {
+        baseURL: process.env.MINIMAX_BASE_URL || 'https://api.minimax.chat/v1',
+      },
+    }),
   ollama: (name, opts) =>
     new ChatOllama({
       model: name.replace(/^ollama:/, ''),

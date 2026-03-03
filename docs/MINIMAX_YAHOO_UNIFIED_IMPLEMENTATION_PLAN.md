@@ -280,29 +280,64 @@ sequenceDiagram
 > Tasks reference implementation IDs from Section 3.
 
 ### Phase 1 — MiniMax Provider Foundation
-- [ ] **P1-T1** Implement provider metadata in `src/providers.ts` (**LLM-01**)
-- [ ] **P1-T2** Implement factory wiring in `src/model/llm.ts` (**LLM-02**)
-- [ ] **P1-T3** Add env docs in `.env.example` (**LLM-03**)
-- [ ] **P1-T4** Add/adjust MiniMax tests (**LLM-04**)
+- [x] **P1-T1** Implement provider metadata in `src/providers.ts` (**LLM-01**)
+- [x] **P1-T2** Implement factory wiring in `src/model/llm.ts` (**LLM-02**)
+- [x] **P1-T3** Add env docs in `.env.example` (**LLM-03**)
+- [x] **P1-T4** Add/adjust MiniMax tests (**LLM-04**)
 
 ### Phase 2 — Yahoo Indian Market Enhancements
-- [ ] **P2-T1** Add `buildYahooSymbol` helper (**FIN-01**)
-- [ ] **P2-T2** Add stock response helper (**FIN-02**)
-- [ ] **P2-T3** Refactor `getStockPrice` with fallback attempts (**FIN-03**)
-- [ ] **P2-T4** Add historical response helper (**FIN-04**)
-- [ ] **P2-T5** Refactor `getHistoricalData` with fallback attempts (**FIN-05**)
-- [ ] **P2-T6** Confirm/test `markets` capability declaration (**FIN-06**)
+- [x] **P2-T1** Add `buildYahooSymbol` helper (**FIN-01**)
+- [x] **P2-T2** Add stock response helper (**FIN-02**)
+- [x] **P2-T3** Refactor `getStockPrice` with fallback attempts (**FIN-03**)
+- [x] **P2-T4** Add historical response helper (**FIN-04**)
+- [x] **P2-T5** Refactor `getHistoricalData` with fallback attempts (**FIN-05**)
+- [x] **P2-T6** Confirm/test `markets` capability declaration (**FIN-06**)
 
 ### Phase 3 — Validation and Hardening
-- [ ] **P3-T1** Run `bun run typecheck` and fix issues (**QA-01**)
-- [ ] **P3-T2** Run `bun test` and fix regressions (**QA-01**)
-- [ ] **P3-T3** Execute focused MiniMax smoke checks (**QA-02**)
-- [ ] **P3-T4** Execute focused Yahoo NSE/BSE smoke checks (**QA-02**)
+- [x] **P3-T1** Run `bun run typecheck` and fix issues (**QA-01**)
+- [x] **P3-T2** Run `bun test` and fix regressions (**QA-01**)
+- [x] **P3-T3** Execute focused MiniMax smoke checks (**QA-02**)
+- [x] **P3-T4** Execute focused Yahoo NSE/BSE smoke checks (**QA-02**)
 
 ### Phase 4 — Documentation and Handoff
-- [ ] **P4-T1** Update implementation notes/changelog for MiniMax and Yahoo behaviors
-- [ ] **P4-T2** Document known limitations and fallback semantics
-- [ ] **P4-T3** Final readiness review against Section 1.4 success criteria
+- [x] **P4-T1** Update implementation notes/changelog for MiniMax and Yahoo behaviors
+- [x] **P4-T2** Document known limitations and fallback semantics
+- [x] **P4-T3** Final readiness review against Section 1.4 success criteria
+
+### 4.1 Implementation Notes / Change Log
+
+#### MiniMax integration
+- Added MiniMax provider metadata in `src/providers.ts` with `modelPrefix: minimax-` and `fastModel: minimax-4-flash`.
+- Added MiniMax factory in `src/model/llm.ts` using `ChatOpenAI` with base URL `https://api.minimax.chat/v1` (overridable via `MINIMAX_BASE_URL`).
+- Added MiniMax key documentation in `env.example`.
+- Added MiniMax tests:
+  - `src/providers.test.ts` (provider resolution + metadata)
+  - `src/model/llm-minimax.test.ts` (factory creation + fast model)
+
+#### Yahoo provider enhancement
+- Refactored Yahoo provider to include exchange-aware symbol building (`.NS`, `.BO`).
+- Added fallback behavior when suffixed symbol lookup fails (fallback to unsuffixed ticker).
+- Added response builder helpers for stock and historical responses.
+- Added focused tests in `src/tools/finance/__tests__/yahoo-provider.test.ts` covering NSE, BSE, and fallback behavior.
+
+### 4.2 Known Limitations and Fallback Semantics
+
+- If `exchange` is not provided, Yahoo symbol generation preserves the raw ticker and does not force suffixing.
+- Fallback currently strips `.NS` / `.BO` once and retries unsuffixed ticker.
+- Not-found detection relies on Yahoo response emptiness/null and provider error text patterns.
+- Yahoo data quality/availability remains dependent on upstream Yahoo Finance coverage.
+
+### 4.3 Final Readiness Review (Section 1.4)
+
+| Success Criterion | Status | Evidence |
+|---|---|---|
+| `resolveProvider('minimax-...')` resolves MiniMax | ✅ | `src/providers.test.ts` |
+| MiniMax requests use `ChatOpenAI` + MiniMax base URL | ✅ | `src/model/llm.ts` + `src/model/llm-minimax.test.ts` |
+| Yahoo handles NSE/BSE symbol resolution | ✅ | `src/tools/finance/providers/yahoo-provider.ts` + `yahoo-provider.test.ts` |
+| Yahoo applies fallback on suffix miss | ✅ | `yahoo-provider.test.ts` fallback tests |
+| Existing providers remain intact | ✅ | Full `bun test` run passing |
+| Typecheck passes | ✅ | `bun run typecheck` |
+| Test suite passes | ✅ | `bun test` |
 
 ---
 

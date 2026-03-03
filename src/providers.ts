@@ -60,6 +60,13 @@ export const PROVIDERS: ProviderDef[] = [
     fastModel: 'deepseek-chat',
   },
   {
+    id: 'minimax',
+    displayName: 'MiniMax',
+    modelPrefix: 'minimax-',
+    apiKeyEnvVar: 'MINIMAX_API_KEY',
+    fastModel: 'minimax-4-flash',
+  },
+  {
     id: 'openrouter',
     displayName: 'OpenRouter',
     modelPrefix: 'openrouter:',
