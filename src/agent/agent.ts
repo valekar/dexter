@@ -15,8 +15,19 @@ import { AgentToolExecutor } from './tool-executor.js';
 
 const DEFAULT_MODEL = 'gpt-5.2';
 const DEFAULT_MAX_ITERATIONS = 10;
+const MAX_ITERATIONS_ENV_VAR = 'DEXTER_MAX_ITERATIONS';
 const MAX_OVERFLOW_RETRIES = 2;
 const OVERFLOW_KEEP_TOOL_USES = 3;
+
+function resolveDefaultMaxIterations(): number {
+  const rawValue = process.env[MAX_ITERATIONS_ENV_VAR]?.trim();
+  if (!rawValue) {
+    return DEFAULT_MAX_ITERATIONS;
+  }
+
+  const parsed = Number.parseInt(rawValue, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_ITERATIONS;
+}
 
 /**
  * The core agent class that handles the agent loop and tool execution.
@@ -36,7 +47,8 @@ export class Agent {
     systemPrompt: string
   ) {
     this.model = config.model ?? DEFAULT_MODEL;
-    this.maxIterations = config.maxIterations ?? DEFAULT_MAX_ITERATIONS;
+    const resolvedMaxIterations = config.maxIterations ?? resolveDefaultMaxIterations();
+    this.maxIterations = resolvedMaxIterations > 0 ? resolvedMaxIterations : DEFAULT_MAX_ITERATIONS;
     this.tools = tools;
     this.toolMap = new Map(tools.map(t => [t.name, t]));
     this.toolExecutor = new AgentToolExecutor(this.toolMap, config.signal, config.requestToolApproval, config.sessionApprovedTools);

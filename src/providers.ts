@@ -60,6 +60,18 @@ export const PROVIDERS: ProviderDef[] = [
     fastModel: 'deepseek-chat',
   },
   {
+    id: 'minimax',
+    displayName: 'MiniMax',
+    modelPrefix: 'minimax',
+    apiKeyEnvVar: 'MINIMAX_API_KEY',
+    fastModel: 'MiniMax-M2-Stable',
+  },
+  {
+    id: 'lmstudio',
+    displayName: 'LM Studio',
+    modelPrefix: 'lmstudio:',
+  },
+  {
     id: 'openrouter',
     displayName: 'OpenRouter',
     modelPrefix: 'openrouter:',
@@ -80,8 +92,11 @@ const defaultProvider = PROVIDERS.find((p) => p.id === 'openai')!;
  * Falls back to OpenAI when no prefix matches.
  */
 export function resolveProvider(modelName: string): ProviderDef {
+  const normalizedModelName = modelName.toLowerCase();
   return (
-    PROVIDERS.find((p) => p.modelPrefix && modelName.startsWith(p.modelPrefix)) ??
+    PROVIDERS.find(
+      (p) => p.modelPrefix && normalizedModelName.startsWith(p.modelPrefix.toLowerCase()),
+    ) ??
     defaultProvider
   );
 }

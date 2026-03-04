@@ -33,6 +33,10 @@ const PROVIDER_MODELS: Record<string, Model[]> = {
     { id: 'deepseek-chat', displayName: 'DeepSeek V3' },
     { id: 'deepseek-reasoner', displayName: 'DeepSeek R1' },
   ],
+  minimax: [
+    { id: 'MiniMax-M2', displayName: 'MiniMax M2' },
+    { id: 'MiniMax-M2-Stable', displayName: 'MiniMax M2 Stable' },
+  ],
 };
 
 export const PROVIDERS: Provider[] = PROVIDER_DEFS.map((provider) => ({
@@ -56,7 +60,7 @@ export function getDefaultModelForProvider(providerId: string): string | undefin
 }
 
 export function getModelDisplayName(modelId: string): string {
-  const normalizedId = modelId.replace(/^(ollama|openrouter):/, '');
+  const normalizedId = modelId.replace(/^(ollama|openrouter|lmstudio):/, '');
 
   for (const provider of PROVIDERS) {
     const model = provider.models.find((entry) => entry.id === normalizedId || entry.id === modelId);

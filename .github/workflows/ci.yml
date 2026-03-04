@@ -2,13 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - '**'
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
 
 jobs:
   checks:
-    if: github.event.action != 'labeled' || github.event.label.name == 'run-ci'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
