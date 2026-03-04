@@ -185,7 +185,7 @@ export async function runCli() {
   });
 
   agentRunner = new AgentRunnerController(
-    { model: modelSelection.model, modelProvider: modelSelection.provider, maxIterations: 10 },
+    { model: modelSelection.model, modelProvider: modelSelection.provider },
     modelSelection.inMemoryChatHistory,
     () => {
       if (!agentRunner) {
