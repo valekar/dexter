@@ -66,6 +66,12 @@ export class AgentRunnerController {
     this.emitChange();
   }
 
+  setModel(model: string, provider: string) {
+    this.agentConfig.model = model;
+    this.agentConfig.modelProvider = provider;
+    this.inMemoryChatHistory.setModel(model);
+  }
+
   respondToApproval(decision: ApprovalDecision) {
     if (!this.approvalResolve) {
       return;

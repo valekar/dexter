@@ -7,7 +7,23 @@ describe('MiniMax LLM integration', () => {
     process.env.MINIMAX_API_KEY = 'test-minimax-key';
 
     try {
-      const model = getChatModel('minimax-4-chat');
+      const model = getChatModel('MiniMax-M2');
+      expect(model).toBeDefined();
+    } finally {
+      if (previousKey === undefined) {
+        delete process.env.MINIMAX_API_KEY;
+      } else {
+        process.env.MINIMAX_API_KEY = previousKey;
+      }
+    }
+  });
+
+  it('keeps legacy MiniMax model IDs backward-compatible', () => {
+    const previousKey = process.env.MINIMAX_API_KEY;
+    process.env.MINIMAX_API_KEY = 'test-minimax-key';
+
+    try {
+      const model = getChatModel('minimax-m2.5');
       expect(model).toBeDefined();
     } finally {
       if (previousKey === undefined) {
@@ -19,7 +35,7 @@ describe('MiniMax LLM integration', () => {
   });
 
   it('returns configured MiniMax fast model', () => {
-    const fastModel = getFastModel('minimax', 'minimax-4-chat');
-    expect(fastModel).toBe('minimax-4-flash');
+    const fastModel = getFastModel('minimax', 'MiniMax-M2');
+    expect(fastModel).toBe('MiniMax-M2-Stable');
   });
 });

@@ -13,6 +13,7 @@ import { DEFAULT_SYSTEM_PROMPT } from '@/agent/prompts';
 import type { TokenUsage } from '@/agent/types';
 import { logger } from '@/utils';
 import { classifyError, isNonRetryableError } from '@/utils/errors';
+import { resolveLmStudioBaseUrl } from '@/utils/lmstudio';
 import { resolveProvider, getProviderById } from '@/providers';
 
 export const DEFAULT_PROVIDER = 'openai';
@@ -55,6 +56,34 @@ interface ModelOpts {
 }
 
 type ModelFactory = (name: string, opts: ModelOpts) => BaseChatModel;
+
+const DEFAULT_MINIMAX_BASE_URL = 'https://api.minimax.io/v1';
+
+const MINIMAX_MODEL_ALIASES: Record<string, string> = {
+  'minimax-4-chat': 'MiniMax-M2',
+  'minimax-4-flash': 'MiniMax-M2-Stable',
+  'minimax-m2.5': 'MiniMax-M2',
+  'minimax/minimax-m2.5': 'MiniMax-M2',
+  'minimaxminimax-m2.5': 'MiniMax-M2',
+};
+
+function resolveMinimaxModelName(modelName: string): string {
+  const trimmed = modelName.trim();
+  const alias = MINIMAX_MODEL_ALIASES[trimmed.toLowerCase()];
+  if (alias) {
+    return alias;
+  }
+
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith('minimax:')) {
+    return trimmed.slice('minimax:'.length);
+  }
+  if (lower.startsWith('minimax/')) {
+    return trimmed.slice('minimax/'.length);
+  }
+
+  return trimmed;
+}
 
 function getApiKey(envVar: string): string {
   const apiKey = process.env[envVar];
@@ -116,11 +145,20 @@ const MODEL_FACTORIES: Record<string, ModelFactory> = {
     }),
   minimax: (name, opts) =>
     new ChatOpenAI({
-      model: name,
+      model: resolveMinimaxModelName(name),
       ...opts,
       apiKey: getApiKey('MINIMAX_API_KEY'),
       configuration: {
-        baseURL: process.env.MINIMAX_BASE_URL || 'https://api.minimax.chat/v1',
+        baseURL: process.env.MINIMAX_BASE_URL || DEFAULT_MINIMAX_BASE_URL,
+      },
+    }),
+  lmstudio: (name, opts) =>
+    new ChatOpenAI({
+      model: name.replace(/^lmstudio:/, ''),
+      ...opts,
+      apiKey: process.env.LMSTUDIO_API_KEY || 'lm-studio',
+      configuration: {
+        baseURL: resolveLmStudioBaseUrl(),
       },
     }),
   ollama: (name, opts) =>

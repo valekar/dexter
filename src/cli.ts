@@ -175,16 +175,22 @@ export async function runCli() {
     tui.requestRender();
   };
 
+  let agentRunner: AgentRunnerController | null = null;
+
   const modelSelection = new ModelSelectionController(onError, () => {
     intro.setModel(modelSelection.model);
+    agentRunner?.setModel(modelSelection.model, modelSelection.provider);
     renderSelectionOverlay();
     tui.requestRender();
   });
 
-  const agentRunner = new AgentRunnerController(
+  agentRunner = new AgentRunnerController(
     { model: modelSelection.model, modelProvider: modelSelection.provider, maxIterations: 10 },
     modelSelection.inMemoryChatHistory,
     () => {
+      if (!agentRunner) {
+        return;
+      }
       renderHistory(chatLog, agentRunner.history);
       workingIndicator.setState(agentRunner.workingState);
       renderSelectionOverlay();

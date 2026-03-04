@@ -9,6 +9,7 @@ import {
   getModelsForProvider,
   type Model,
 } from '../utils/model.js';
+import { getLmStudioModels } from '../utils/lmstudio.js';
 import { getOllamaModels } from '../utils/ollama.js';
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from '../model/llm.js';
 import { InMemoryChatHistory } from '../utils/in-memory-chat-history.js';
@@ -109,6 +110,14 @@ export class ModelSelectionController {
       return;
     }
 
+    if (providerId === 'lmstudio') {
+      const lmStudioModelIds = await getLmStudioModels();
+      this.pendingModelsValue = lmStudioModelIds.map((id) => ({ id, displayName: id }));
+      this.appStateValue = 'model_select';
+      this.emitChange();
+      return;
+    }
+
     this.pendingModelsValue = getModelsForProvider(providerId);
     this.appStateValue = 'model_select';
     this.emitChange();
@@ -126,6 +135,11 @@ export class ModelSelectionController {
 
     if (this.pendingProviderValue === 'ollama') {
       this.completeModelSwitch(this.pendingProviderValue, `ollama:${modelId}`);
+      return;
+    }
+
+    if (this.pendingProviderValue === 'lmstudio') {
+      this.completeModelSwitch(this.pendingProviderValue, `lmstudio:${modelId}`);
       return;
     }
 
